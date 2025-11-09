@@ -203,7 +203,7 @@ class Scythe:
         resumption_token: str | None = None,
         ignore_deleted: bool = False,
         custom_query: dict | None = None,
-    ) -> Iterator[OAIResponse | Record]:
+    ) -> BaseOAIIterator:
         """Issue a ListRecords request to the OAI server.
 
         Send a request to list records from the OAI server, allowing for selective harvesting based on date range,
@@ -244,7 +244,7 @@ class Scythe:
         if custom_query:
             _query.update(custom_query)
         query = remove_none_values(filter_dict_except_resumption_token(_query))
-        yield from self.iterator(self, query, ignore_deleted=ignore_deleted)
+        return self.iterator(self, query, ignore_deleted=ignore_deleted)
 
     def list_identifiers(
         self,
@@ -254,7 +254,7 @@ class Scythe:
         set_: str | None = None,
         resumption_token: str | None = None,
         ignore_deleted: bool = False,
-    ) -> Iterator[OAIResponse | Header]:
+    ) -> BaseOAIIterator:
         """Issue a ListIdentifiers request to the OAI server.
 
         Send a request to list record identifiers from the OAI server. This method allows filtering records based on
@@ -293,7 +293,7 @@ class Scythe:
         }
 
         query = remove_none_values(filter_dict_except_resumption_token(_query))
-        yield from self.iterator(self, query, ignore_deleted=ignore_deleted)
+        return self.iterator(self, query, ignore_deleted=ignore_deleted)
 
     def list_sets(self, resumption_token: str | None = None) -> Iterator[OAIResponse | Set]:
         """Issue a ListSets request to the OAI server.
