@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import xml.etree.ElementTree as ET
+
 import pytest
-from lxml import etree
 
 from oaipmh_scythe import OAIResponse
 from oaipmh_scythe.models import Header, Identify, MetadataFormat, Record, ResumptionToken, Set
@@ -28,7 +29,7 @@ def identify_response(mocker):
     </OAI-PMH>
     """
     mock_response = mocker.MagicMock(spec=OAIResponse)
-    mock_response.xml = etree.fromstring(xml)
+    mock_response.xml = ET.fromstring(xml)
     return mock_response
 
 
@@ -39,17 +40,17 @@ def identify(identify_response) -> Identify:
 
 def test_identify_bytes(identify):
     assert isinstance(identify.__bytes__(), bytes)
-    assert b"<baseURL>https://zenodo.org/oai2d</baseURL>" in identify.__bytes__()
+    assert b"<ns0:baseURL>https://zenodo.org/oai2d</ns0:baseURL>" in identify.__bytes__()
 
 
 def test_identify_str(identify):
     assert isinstance(identify.__str__(), str)
-    assert "<baseURL>https://zenodo.org/oai2d</baseURL>" in str(identify)
+    assert "<ns0:baseURL>https://zenodo.org/oai2d</ns0:baseURL>" in str(identify)
 
 
 def test_identify_raw(identify):
     assert isinstance(identify.raw, str)
-    assert "<baseURL>https://zenodo.org/oai2d</baseURL>" in identify.raw
+    assert "<ns0:baseURL>https://zenodo.org/oai2d</ns0:baseURL>" in identify.raw
 
 
 def test_identify_repr(identify):
@@ -77,7 +78,7 @@ def header_element():
         <datestamp>2022-05-11T13:49:36Z</datestamp>
     </header>
     """
-    return etree.fromstring(xml.encode())
+    return ET.fromstring(xml.encode())
 
 
 @pytest.fixture(scope="session")
@@ -88,7 +89,7 @@ def deleted_header_element():
         <datestamp>2022-05-11T13:49:36Z</datestamp>
     </header>
     """
-    return etree.fromstring(xml.encode())
+    return ET.fromstring(xml.encode())
 
 
 @pytest.fixture
@@ -140,7 +141,7 @@ def record_element():
         </metadata>
     </record>
     """
-    return etree.fromstring(xml.encode())
+    return ET.fromstring(xml.encode())
 
 
 @pytest.fixture
@@ -160,7 +161,7 @@ def deleted_record_lement():
         </metadata>
     </record>
     """
-    return etree.fromstring(xml.encode())
+    return ET.fromstring(xml.encode())
 
 
 @pytest.fixture
@@ -210,7 +211,7 @@ def set_element():
         <setDescription></setDescription>
     </set>
     """
-    return etree.fromstring(xml.encode())
+    return ET.fromstring(xml.encode())
 
 
 @pytest.fixture
@@ -242,7 +243,7 @@ def mdf_element():
         <metadataNamespace>https://www.loc.gov/standards/marcxml/</metadataNamespace>
     </metadataFormat>
     """
-    return etree.fromstring(xml.encode())
+    return ET.fromstring(xml.encode())
 
 
 @pytest.fixture

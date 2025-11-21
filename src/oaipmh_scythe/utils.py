@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import logging
 import re
+import xml.etree.ElementTree as ET
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -28,7 +29,6 @@ if TYPE_CHECKING:
     from typing import Any
 
     import httpx
-    from lxml import etree
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ def filter_dict_except_resumption_token(d: dict[str, Any | None]) -> dict[str, A
     return d
 
 
-def get_namespace(element: etree._Element) -> str | None:
+def get_namespace(element: ET.Element) -> str | None:
     """Return the namespace URI of an XML element.
 
     Extracts and returns the namespace URI from the tag of the given XML element.
@@ -104,7 +104,7 @@ def get_namespace(element: etree._Element) -> str | None:
 
 
 def xml_to_dict(
-    tree: etree._Element, paths: list[str] | None = None, nsmap: dict[str, str] | None = None, strip_ns: bool = False
+    tree: ET.Element, paths: list[str] | None = None, nsmap: dict[str, str] | None = None, strip_ns: bool = False
 ) -> dict[str, list[str | None]]:
     """Convert an XML tree to a dictionary, with options for custom XPath and namespace handling.
 
@@ -131,8 +131,16 @@ def xml_to_dict(
     paths = paths or [".//"]
     nsmap = nsmap or {}
     fields = defaultdict(list)
-    for path in paths:
-        elements = tree.findall(path, nsmap)
+    for xpath in paths:
+        # Convert nsmap format to ElementTree format if needed
+        search_path = xpath
+        if nsmap and ":" in xpath:
+            # ElementTree uses Clark notation for namespaces in findall
+            # Need to convert prefix:tag to {namespace}tag
+            for prefix, uri in nsmap.items():
+                search_path = search_path.replace(f"{prefix}:", f"{{{uri}}}")
+
+        elements = tree.findall(search_path, nsmap)
         for element in elements:
             tag = re.sub(r"\{.*\}", "", element.tag) if strip_ns else element.tag
             fields[tag].append(element.text)

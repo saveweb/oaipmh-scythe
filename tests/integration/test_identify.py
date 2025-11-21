@@ -37,7 +37,7 @@ def test_identify(scythe: Scythe) -> None:
 @pytest.mark.vcr
 def test_non_oai_pmh_url() -> None:
     scythe = Scythe("https://duckduckgo.com/")
-    with pytest.raises(ValueError, match="Identify element not found in the XML"):
+    with pytest.raises(ValueError, match="Failed to parse response as XML"):
         scythe.identify()
     scythe.close()
 

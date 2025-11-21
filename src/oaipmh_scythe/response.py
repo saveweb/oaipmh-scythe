@@ -12,15 +12,12 @@ with various components of an OAI-PMH client, handling the nuances of OAI-PMH re
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from lxml import etree
-
 if TYPE_CHECKING:
     from httpx import Response
-
-XMLParser = etree.XMLParser(remove_blank_text=True, recover=True, resolve_entities=False)
 
 
 @dataclass
@@ -45,9 +42,17 @@ class OAIResponse:
         return self.http_response.text
 
     @property
-    def xml(self) -> etree._Element:
-        """Parse the server's response content and return it as an `etree._Element` object."""
-        return etree.XML(self.http_response.content, parser=XMLParser)
+    def xml(self) -> ET.Element:
+        """Parse the server's response content and return it as an `ET.Element` object.
+
+        Raises:
+            ValueError: If the content cannot be parsed as valid XML.
+        """
+        try:
+            return ET.fromstring(self.http_response.content)
+        except ET.ParseError as e:
+            msg = f"Failed to parse response as XML: {e}"
+            raise ValueError(msg) from e
 
     def __str__(self) -> str:
         verb = self.params.get("verb")

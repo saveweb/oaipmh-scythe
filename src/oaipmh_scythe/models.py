@@ -21,10 +21,9 @@ Classes:
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-
-from lxml import etree
 
 from oaipmh_scythe.utils import get_namespace, xml_to_dict
 
@@ -72,22 +71,22 @@ class OAIItem:
         _oai_namespace: The namespace URI extracted from the XML element.
     """
 
-    def __init__(self, xml: etree._Element, strip_ns: bool = True) -> None:
+    def __init__(self, xml: ET.Element, strip_ns: bool = True) -> None:
         super().__init__()
         self.xml = xml
         self._strip_ns = strip_ns
         self._oai_namespace = get_namespace(self.xml)
 
     def __bytes__(self) -> bytes:
-        return etree.tostring(self.xml, encoding="utf-8")
+        return ET.tostring(self.xml, encoding="utf-8")
 
     def __str__(self) -> str:
-        return etree.tostring(self.xml, encoding="unicode")
+        return ET.tostring(self.xml, encoding="unicode")
 
     @property
     def raw(self) -> str:
         """Return the original XML as a unicode string."""
-        return etree.tostring(self.xml, encoding="unicode")
+        return ET.tostring(self.xml, encoding="unicode")
 
 
 class Identify(OAIItem):
@@ -148,7 +147,7 @@ class Header(OAIItem):
         setSpecs: A list of set specifications that the record belongs to.
     """
 
-    def __init__(self, header_element: etree._Element) -> None:
+    def __init__(self, header_element: ET.Element) -> None:
         super().__init__(header_element, strip_ns=True)
         self.deleted = self.xml.attrib.get("status") == "deleted"
         _identifier_element = self.xml.find(f"{self._oai_namespace}identifier")
@@ -192,7 +191,7 @@ class Record(OAIItem):
         ValueError: If the header element is not found in the provided XML.
     """
 
-    def __init__(self, record_element: etree._Element, strip_ns: bool = True) -> None:
+    def __init__(self, record_element: ET.Element, strip_ns: bool = True) -> None:
         super().__init__(record_element, strip_ns=strip_ns)
         header_element = self.xml.find(f".//{self._oai_namespace}header")
         if header_element is None:
@@ -214,10 +213,11 @@ class Record(OAIItem):
         # We want to get record/metadata/<container>/*
         # <container> would be the element ``dc``
         # in the ``oai_dc`` case.
-        return xml_to_dict(
-            self.xml.find(".//" + self._oai_namespace + "metadata").getchildren()[0],
-            strip_ns=self._strip_ns,
-        )
+        namespace = self._oai_namespace or ""
+        metadata_element = self.xml.find(".//" + namespace + "metadata")
+        if metadata_element is not None and len(metadata_element) > 0:
+            return xml_to_dict(next(iter(metadata_element)), strip_ns=self._strip_ns)
+        return {}
 
 
 class Set(OAIItem):
@@ -235,7 +235,7 @@ class Set(OAIItem):
         _set_dict: A dictionary containing the parsed set information.
     """
 
-    def __init__(self, set_element: etree._Element) -> None:
+    def __init__(self, set_element: ET.Element) -> None:
         super().__init__(set_element, strip_ns=True)
         self._set_dict = xml_to_dict(self.xml, strip_ns=True)
         self.setName: str | None = None
@@ -265,7 +265,7 @@ class MetadataFormat(OAIItem):
         _mdf_dict: A dictionary containing the parsed metadata format details.
     """
 
-    def __init__(self, mdf_element: etree._Element) -> None:
+    def __init__(self, mdf_element: ET.Element) -> None:
         super().__init__(mdf_element, strip_ns=True)
         self._mdf_dict = xml_to_dict(self.xml, strip_ns=True)
         self.metadataPrefix: str | None = None

@@ -4,12 +4,12 @@
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 import httpx
 import pytest
-from lxml import etree
 
 from oaipmh_scythe.iterator import OAIResponseIterator
 from oaipmh_scythe.models import Record
@@ -154,5 +154,5 @@ def test_list_records_oai_response(scythe: Scythe) -> None:
     response = responses[0]
     assert isinstance(response, OAIResponse)
     assert response.params == {"metadataPrefix": "oai_dc", "verb": "ListRecords"}
-    assert isinstance(response.xml, etree._Element)
+    assert isinstance(response.xml, ET.Element)
     assert response.xml.tag == "{http://www.openarchives.org/OAI/2.0/}OAI-PMH"

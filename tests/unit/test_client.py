@@ -175,7 +175,7 @@ def test_list_records_with_custom_query(scythe: Scythe, respx_mock: MockRouter) 
                     <datestamp>2025-01-01T00:00:00Z</datestamp>
                 </header>
                 <metadata>
-                    <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/">
+                    <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/">
                         <dc:title>Test Record</dc:title>
                     </oai_dc:dc>
                 </metadata>
