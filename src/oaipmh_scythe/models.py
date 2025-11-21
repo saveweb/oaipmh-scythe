@@ -76,6 +76,9 @@ class OAIItem:
         self.xml = xml
         self._strip_ns = strip_ns
         self._oai_namespace = get_namespace(self.xml)
+        # Register OAI-PMH namespace to avoid ns0 prefix in serialization
+        if self._oai_namespace:
+            ET.register_namespace("", self._oai_namespace.strip("{}"))
 
     def __bytes__(self) -> bytes:
         return ET.tostring(self.xml, encoding="utf-8")

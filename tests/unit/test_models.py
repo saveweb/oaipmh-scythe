@@ -40,17 +40,17 @@ def identify(identify_response) -> Identify:
 
 def test_identify_bytes(identify):
     assert isinstance(identify.__bytes__(), bytes)
-    assert b"<ns0:baseURL>https://zenodo.org/oai2d</ns0:baseURL>" in identify.__bytes__()
+    assert b"<baseURL>https://zenodo.org/oai2d</baseURL>" in identify.__bytes__()
 
 
 def test_identify_str(identify):
     assert isinstance(identify.__str__(), str)
-    assert "<ns0:baseURL>https://zenodo.org/oai2d</ns0:baseURL>" in str(identify)
+    assert "<baseURL>https://zenodo.org/oai2d</baseURL>" in str(identify)
 
 
 def test_identify_raw(identify):
     assert isinstance(identify.raw, str)
-    assert "<ns0:baseURL>https://zenodo.org/oai2d</ns0:baseURL>" in identify.raw
+    assert "<baseURL>https://zenodo.org/oai2d</baseURL>" in identify.raw
 
 
 def test_identify_repr(identify):
